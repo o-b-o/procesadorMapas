@@ -1,0 +1,30 @@
+package com.tarea2.staticshit;
+
+
+
+public class TestUtil {
+    public static void main(String[] args){
+	int[] calif = {1,2,3,3};
+	double prom = MiClaseUtil.promedio(calif);
+	System.out.println("promedio ints: " + prom);
+
+	byte[] califb = {1,2,3,3};
+	double promb = MiClaseUtil.promedio(califb);
+	System.out.println("promedio bytes: " + promb);
+	
+	short[] califs = {1,2,3,3};
+	double proms = MiClaseUtil.promedio(califs);
+	System.out.println("promedio shorts: " + proms);
+	long[] califl = {1,2,3,3};
+	double proml = MiClaseUtil.promedio(califl);
+	System.out.println("promedio longs: " + proml);
+	
+	float[] califf = {1,2,3,3};
+	double promf = MiClaseUtil.promedio(califf);
+	System.out.println("promedio floats: " + promf);
+	double[] califd = {3.00,499,10};
+	double promd = MiClaseUtil.promedio(califd);
+	System.out.println("promedio doubles: " + promd);
+    }
+    
+}

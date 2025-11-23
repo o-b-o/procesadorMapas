@@ -1,0 +1,70 @@
+package com.tarea2.tareea2;
+
+public class MiClaseUtil {
+    private MiClaseUtil() {
+        throw new UnsupportedOperationException("nope.");
+    }
+
+    public static double promedio(int[] arreglo) {
+        int acumulador = 0;
+
+        for (int i = 0; i < arreglo.length; i++) {
+            acumulador += arreglo[i];
+        }
+
+        return (double) acumulador / arreglo.length;
+    }
+
+    public static double promedio(byte[] arreglo) {
+        byte acumulador = 0;
+
+        for (byte i = 0; i < arreglo.length; i++) {
+            acumulador += arreglo[i];
+        }
+
+        return (double) acumulador / arreglo.length;
+    }
+
+
+    public static double promedio(short[] arreglo) {
+        short acumulador = 0;
+
+        for (short i = 0; i < arreglo.length; i++) {
+            acumulador += arreglo[i];
+        }
+
+        return (double) acumulador / arreglo.length;
+    }
+    
+    public static double promedio(long[] arreglo) {
+        long acumulador = 0;
+
+        for (int i = 0; i < arreglo.length; i++) {
+            acumulador += arreglo[i];
+        }
+
+        return (double) acumulador / arreglo.length;
+    }
+    
+    public static double promedio(float[] arreglo) {
+        float acumulador = 0;
+
+        for (int i = 0; i < arreglo.length; i++) {
+            acumulador += arreglo[i];
+        }
+
+        return (double) acumulador / arreglo.length;
+    }
+
+    public static double promedio(double[] arreglo) {
+        double acumulador = 0;
+
+        for (int i = 0; i < arreglo.length; i++) {
+            acumulador += arreglo[i];
+        }
+
+        return (double) acumulador / arreglo.length;
+    }
+
+
+}
