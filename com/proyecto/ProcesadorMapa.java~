@@ -1,0 +1,7 @@
+package com.proyecto;
+
+public interface ProcesadorMapa{
+    // el metodo para procesar UN mapa
+    public MapaParticular procesar(MapaParticular original);
+    public ConjuntoDeMapas procesarConjunto(ConjuntoDeMapas original);
+}

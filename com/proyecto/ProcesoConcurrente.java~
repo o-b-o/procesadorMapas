@@ -1,0 +1,18 @@
+package com.proyecto;
+public class ProcesoConcurrente implements ProcesadorMapa{
+    private String programa;
+    public ProcesoConcurrente(String programa){
+	this.programa = programa;
+	
+    };
+    @Override
+    public MapaParticular procesar(MapaParticular original){
+	System.out.printf(" uwu %d \n", original.datos.getVecIntensidades().getIntensidadAtIndex(3));
+	return original;
+    }
+    @Override
+    public ConjuntoDeMapas procesarConjunto(ConjuntoDeMapas original){
+	System.out.printf(" uwu %d \n", original.getMapaWithIndex(0).datos.getVecIntensidades().getIntensidadAtIndex(3));
+	return original;
+    }
+}

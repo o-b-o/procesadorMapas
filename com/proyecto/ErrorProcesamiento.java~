@@ -1,0 +1,12 @@
+// excepcion base
+package com.proyecto;
+
+public class ErrorProcesamiento extends Exception {
+    public ProcesamientoException(String mensaje) {
+        super(mensaje);
+    }
+    
+    public ProcesamientoException(String mensaje, Throwable causa) {
+        super(mensaje, causa);
+    }
+}
