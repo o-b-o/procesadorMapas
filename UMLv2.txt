@@ -1,0 +1,119 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor White
+skinparam classBorderColor Black
+
+title Arquitectura de procesamiento concurrente
+
+' --- The Main Orchestrator ---
+class Proyecto {
+  + {static} void main(String[] args)
+  - FileHandlr fileHandler
+  - Procesador procesador
+  + Proyecto Proyecto()
+  + void ejecutar()
+  
+}
+
+' --- Data Structure ---
+class DataGeometry {
+  - final int longitudEjeX '--- cuantos ticks en x hay 1600
+  - final int longitudEjeY '--- cuantas columnas hay (puntos en el mapa) 900 (30x30)
+  + int getLongX( )
+  + int getLongY( )
+  + DataGeometry DataGeometry(int x, int y)
+}
+class VecNumeroDeOnda {
+  - final double[longitudEjeX] numerosDeOnda 
+    + double[] getNumOnda()
+    + VecNumeroDeOnda VecNumeroDeOnda(double[] numOndaVec)
+
+}
+class VecIntensidad {
+  - int[] intensidad
+  + int[] getIntensidad()
+  + void setIntensidad(int[] intensidades)
+}
+
+class MapaParticular {
+  + int [] idIndex
+  + DatosEspectro datos
+}
+'-- clase definida para contener un arreglo de mapas (VecIntensidad[n] + VecNumeroDeOnda)
+class ConjuntoDeMapas {
+  + MapaParticular[]
+}
+
+' --- File Handling Strategy ---
+abstract class FileHandlr {
+  - String caminoEntrada
+  - String caminoSalida
+  + {abstract} *ConjuntoDeMapas leerDatosCompletos()
+}
+class SeqHandlr extends FileHandlr
+class ConcurrentHandlr extends FileHandlr
+
+' --- Data Processing Strategy ---
+class Procesador  <T extends ProcesadorMapa, U extends SelectorDeMapas>{
+  - String parametrosSelector
+  - U selector
+  - T procesador 
+  
+  + Procesador Procesador(String params, U s, T p)
+  + ConjuntoDeMapas ejecutarProceso(ConjuntoDeMapas entrada)throws ErrorProceso
+  }
+class ErrorProceso extends Exception
+interface SelectorDeMapas {
+  + ConjuntoDeMapas seleccionar(ConjuntoDeMapas original, int[] listaDeIndices)
+}
+class SelectorSimple implements SelectorDeMapas{
+  - String program
+  + SelectorSimple SelectorSimple(String program)
+  + ConjuntoDeMapas seleccionar(ConjuntoDeMapas original, int[] listaDeIndices)
+  + String getProgram()
+}
+interface ProcesadorMapa {
+  + MapaParticular procesar(MapaParticular original)
+}
+class ProcesoSecuencial implements ProcesadorMapa {
+  - String program
+  + ProcesoSecuencial (program)
+  + MapaParticular procesar(MapaParticular original)
+  }
+  class ProcesoConcurrente implements ProcesadorMapa {
+  - String program
+  + ProcesoConcurrente (program)
+  + MapaParticular procesar(MapaParticular original)
+  }
+class DatosEspectro {
+  + VecNumeroDeOnda ejeX
+  + VecIntensidad ejeY
+}
+class FreqSelectr implements ProcesadorMapa
+class Clustrr implements ProcesadorMapa
+
+' --- Relationships ---
+Procesador o-- ProcesadorMapa:tiene-un
+Procesador o-- SelectorDeMapas:tiene-un
+' Proyecto is configured with a specific handler and processor
+Proyecto o-- FileHandlr : tiene-un
+Proyecto o-- Procesador : tiene-un
+
+' Proyecto uses, but does not own, the data structure
+Proyecto ..> ConjuntoDeMapas : usa
+' Conjunto de mapas tiene un? (varios!) aqui aplica agregacion?) mapa
+ConjuntoDeMapas *-- "1..*" MapaParticular : "está compuesto de"
+
+MapaParticular *-- "1" DatosEspectro : "esta compuesto de"
+DatosEspectro *-- "1" VecNumeroDeOnda : "esta compuesto de"
+DatosEspectro *-- "1..*" VecIntensidad : "esta compuesto de"
+
+' The handlers PRODUCE the data structure
+FileHandlr ..> ConjuntoDeMapas:crea
+
+' The processors CONSUME and PRODUCE the data structure
+Procesador ..> ConjuntoDeMapas : usa
+FileHandlr ..> DataGeometry : usa
+SelectorSimple ..|> SelectorDeMapas : implementa
+ConcurrentHandlr --|> FileHandlr : hereda de
+@enduml
