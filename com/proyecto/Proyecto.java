@@ -220,7 +220,8 @@ private static void ejecutarAnalisisConcurrente(DataGeometry config, double targ
     // --- Part 1: Configuration (Same as before) ---
     String chunkDir = config.outputDir + "chunks/";
     System.out.printf("chunkdir %s \n", chunkDir);
-    String procdDir = config.outputDir + "procd/";
+    String procdDir = config.outputDir + "/procd/";
+        System.out.printf("outdir %s procddir %s \n", chunkDir, procdDir);
     String filterTag = cellLineFilter.isEmpty() ? "todos" : cellLineFilter;
     filterTag += "_";
     filterTag += qualityFilter.isEmpty() ? "todos" : qualityFilter;
@@ -292,7 +293,7 @@ private static void ejecutarAnalisisConcurrente(DataGeometry config, double targ
     // --- Part 1: Configuration ---
     String chunkDir = outputDir + "/chunks/";
     String procdDir = outputDir + "/procd";
-    
+    System.out.printf("outdir %s procddir %s \n", chunkDir, procdDir);
     // Make the output filename reflect the filters being used
     String filterTag = cellLineFilter.isEmpty() ? "todos" : cellLineFilter;
     filterTag += "_";
@@ -390,7 +391,8 @@ private static void ejecutarAnalisisConcurrente(DataGeometry config, double targ
     
     // Construct the path to where the chunks are located. You are correct.
     String chunkDir = outputDir+ "chunks/";
-    String procdDir = outputDir + "procd";
+    String procdDir = outputDir + "/procd";
+        System.out.printf("outdir %s procddir %s \n", chunkDir, procdDir);
     // Construct the full path for the final Octave script file.
     String octaveFilename = String.format("%s/resultado_onda_%.0f.m", procdDir, targetWavenumber);
 

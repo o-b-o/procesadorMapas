@@ -138,7 +138,7 @@ public List<MapaConNombre> leerConjuntoDeArchivoConNombres(File archivo, int row
      * PRIVATE HELPER METHOD: This is the refactored original method.
      * Its only job is to convert a pre-read list of string arrays into one MapaParticular.
      */
-    private MapaParticular parsearFilasAMapa(List<String[]> filasDelMapa, int indice) {
+    public static MapaParticular parsearFilasAMapa(List<String[]> filasDelMapa, int indice) {
         int numRenglones = filasDelMapa.size();
         if (numRenglones == 0) {
             throw new IllegalArgumentException("La lista de filas para parsear está vacía.");
