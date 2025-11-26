@@ -18,7 +18,18 @@ public class Menu {
         } catch (NumberFormatException e) {
             System.out.print("Entrada inválida. Por favor ingrese un número: ");
         }
+    }}
+    public static double getUserDouble(Scanner scanner) {
+    while (true) { // Loop until we get a valid number
+        String line = scanner.nextLine(); // Always read the whole line
+        try {
+            return Double.parseDouble(line); // Try to convert it
+        } catch (NumberFormatException e) {
+            System.out.print("Entrada inválida. Por favor ingrese un número: ");
+        }
     }
-}
+    }
+
+    
 
 }
