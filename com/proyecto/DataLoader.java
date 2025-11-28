@@ -10,74 +10,72 @@ import java.util.List;
 public class DataLoader {
 
     /**
-     * Reads a single file, which may contain multiple data blocks (maps), and
-     * converts it into a ConjuntoDeMapas.
+     * Lee un solo archivo que puede contener multiples bloques de datos (mapas) y lo convierte en un ConjuntoDeMapas
      *
-     * @param archivo The File object to read.
-     * @param rowsPerMap The number of rows that constitute a single MapaParticular.
-     * @param startIndex The starting index to assign to the maps found in this file.
-     * @return A ConjuntoDeMapas containing all the maps extracted from the file.
-     * @throws IOException If there is an error reading the file.
+     * @param archivo el objeto File a leer
+     * @param renglonesPorMapa el numero de renglones en un solo mapa particular
+     * @param indiceInicio el indice inicial para los mapas en este archivo
+     * @return un ConjuntoDeMapas que contiene todos los mapas extraidos del archivo
+     * @throws IOException si hay error leyendo el archivo
      */
-    public ConjuntoDeMapas leerConjuntoDeArchivo(File archivo, int rowsPerMap, int startIndex) throws IOException {
+    public ConjuntoDeMapas leerConjuntoDeArchivo(File archivo, int renglonesPorMapa, int indiceInicio) throws IOException {
         System.out.printf("Cargando conjunto de mapas desde: %s\n", archivo.getName());
 
-        // --- Step 1: Read the ENTIRE file, separating data from comments ---
-        // This is the cleaned-up, simplified loop.
+        // leee todo el archivo separando los datos de los compentaros
+
         BufferedReader br = new BufferedReader(new FileReader(archivo));
         List<String[]> todasLasFilas = new ArrayList<>();
         String line;
 
         while ((line = br.readLine()) != null) {
-            // If a line is NOT a comment AND is not empty, it's data.
+            // si una linea no es comentario y no esta vacia es dato
             if (!line.startsWith("#") && !line.trim().isEmpty()) {
                 todasLasFilas.add(line.split("\t"));
             }
-            // All other lines (comments, empty lines) are simply ignored.
+            // todo lo demas, me da igual
         }
         br.close();
 
         if (todasLasFilas.isEmpty()) {
-            // Return an empty set if the file has no data
+            // regresa vacio si no hay dato
             return new ConjuntoDeMapas(new MapaParticular[0]);
         }
 
-        // --- Step 2: Determine how many maps are in this file ---
-        int totalMapasEnArchivo = todasLasFilas.size() / rowsPerMap;
-        System.out.printf("  Detectados %d mapas en este archivo (bloques de %d filas).\n", totalMapasEnArchivo, rowsPerMap);
+        //determina cuanto mapa en este archivo
+        int totalMapasEnArchivo = todasLasFilas.size() / renglonesPorMapa;
+        System.out.printf("  Detectados %d mapas en este archivo (bloques de %d filas).\n", totalMapasEnArchivo, renglonesPorMapa);
         
         List<MapaParticular> listaDeMapas = new ArrayList<>();
 
-        // --- Step 3: Loop through the data in "blocks" of rowsPerMap ---
+        // itera por los datos 
         for (int i = 0; i < totalMapasEnArchivo; i++) {
-            int fromIndex = i * rowsPerMap;
-            int toIndex = fromIndex + rowsPerMap;
+            int fromIndex = i * renglonesPorMapa;
+            int toIndex = fromIndex + renglonesPorMapa;
 
             List<String[]> filasDelMapaActual = todasLasFilas.subList(fromIndex, toIndex);
             
-            int mapIndex = startIndex + i;
+            int mapIndex = indiceInicio + i;
 
-            // Call our helper to do the hard work of parsing these specific rows
+
             MapaParticular mapa = parsearFilasAMapa(filasDelMapaActual, mapIndex);
             listaDeMapas.add(mapa);
         }
         
-        // Convert the list to the array required by the ConjuntoDeMapas constructor
+        // convertir la lista al arreglo requerido por el constructor de conjuntodemapas
         return new ConjuntoDeMapas(listaDeMapas.toArray(new MapaParticular[0]));
     }
-// This code goes inside the public class DataLoader { ... }
+
 
 /**
- * Reads a single file and returns a list of MapaParticular objects, each bundled
- * with its original source filename as extracted from a "# DATA FROM:" header.
+ * Lee un archivo y regresa una lista de objetos MapaParticular con su nombre original
  *
- * @param archivo The File object to read (e.g., a chunk file).
- * @param rowsPerMap The number of data rows that constitute a single MapaParticular.
- * @param startIndex The starting index to assign to the maps found in this file.
- * @return A List of MapaConNombre wrappers, each containing a map and its name.
- * @throws IOException If there is an error reading the file.
+ * @param archivo archivo a leer
+ * @param renglonesPorMapa renglones en un solo mapa particular
+ * @param iniceInicio el indice inicial para los mapas de este archivo
+ * @return una lista de MapaConNombre
+ * @throws ErrorLectura si hay errores leyendo el archivo
  */
-public List<MapaConNombre> leerConjuntoDeArchivoConNombres(File archivo, int rowsPerMap, int startIndex) throws IOException {
+public List<MapaConNombre> leerConjuntoDeArchivoConNombres(File archivo, int renglonesPorMapa, int iniceInicio) throws IOException {
     System.out.printf("Cargando mapas y nombres desde: %s\n", archivo.getName());
 
     BufferedReader br = new BufferedReader(new FileReader(archivo));
@@ -85,49 +83,49 @@ public List<MapaConNombre> leerConjuntoDeArchivoConNombres(File archivo, int row
     List<String> nombresDeMapas = new ArrayList<>();
     String line;
 
-    // --- Step 1: Read the entire file, separating data from special headers ---
+    // lee todo el archivo separando datos de headers
     while ((line = br.readLine()) != null) {
-        if (line.trim().startsWith("# DATA FROM:")) {
-            // This is a special header that tells us a new map's data is starting.
-            // We extract the name from it and store it.
-            String mapName = line.replace("# DATA FROM:", "").trim();
+        if (line.trim().startsWith("# datos de:")) {
+            // este es un header que nos dice un nuevo mapa comienza
+            // le sacamos el nombre y guardamos
+            String mapName = line.replace("# datos de:", "").trim();
             nombresDeMapas.add(mapName);
         } else if (!line.startsWith("#") && !line.trim().isEmpty()) {
-            // This is a data line. Add it to our data list.
+            // esta es una linea de datos, la aniadimos a la lista de datos
             todasLasFilasDeDatos.add(line.split("\t"));
         }
-        // Other comments (like column headers) are simply ignored.
+        // todo lo demas comentario se ignora
     }
     br.close();
 
     if (todasLasFilasDeDatos.isEmpty()) {
         System.out.println("  No se encontraron filas de datos en el archivo.");
-        return new ArrayList<>(); // Return an empty list if there's no data
+        return new ArrayList<>(); // regresa una lista vacia si no hay dato
     }
 
-    // --- Step 2: Parse the data blocks and wrap them with their names ---
-    int totalMapasDetectados = todasLasFilasDeDatos.size() / rowsPerMap;
+    //  lee los bloques de datos y les pone nombre
+    int totalMapasDetectados = todasLasFilasDeDatos.size() / renglonesPorMapa;
     System.out.printf("  Detectados %d bloques de datos y %d nombres de mapas.\n", totalMapasDetectados, nombresDeMapas.size());
 
-    // It's good practice to check if the numbers match.
+    // revisa si tiene tantos nombres como bloquesk
     if (totalMapasDetectados != nombresDeMapas.size()) {
-        System.err.println("ADVERTENCIA: El número de bloques de datos no coincide con el número de encabezados '# DATA FROM:'. Se usarán nombres por defecto.");
+        System.err.println("ADVERTENCIA: El numero de bloques de datos no coincide con el numero de encabezados '# datos de:'. Se usaran nombres por defecto.");
     }
     
     List<MapaConNombre> listaDeMapasEnvueltos = new ArrayList<>();
     for (int i = 0; i < totalMapasDetectados; i++) {
-        int fromIndex = i * rowsPerMap;
-        int toIndex = fromIndex + rowsPerMap;
+        int fromIndex = i * renglonesPorMapa;
+        int toIndex = fromIndex + renglonesPorMapa;
         List<String[]> filasDelMapaActual = todasLasFilasDeDatos.subList(fromIndex, toIndex);
         
-        int mapIndex = startIndex + i;
-        // Get the corresponding name. If we don't have enough names, use a default.
+        int mapIndex = iniceInicio + i;
+        // saca el nombre, si no tenemos suficientes usa el de defecto
         String mapName = (i < nombresDeMapas.size()) ? nombresDeMapas.get(i) : "mapa_desconocido_" + mapIndex + ".csv";
 
-        // Call the existing helper to create the core MapaParticular object
+        // crea el ojeto mapaparticular
         MapaParticular mapa = parsearFilasAMapa(filasDelMapaActual, mapIndex);
 
-        // **THE KEY STEP:** Create the wrapper that bundles the map and its name
+        // crea el elvoltorio de mapa con nombre
         MapaConNombre wrapper = new MapaConNombre(mapa, mapName);
         listaDeMapasEnvueltos.add(wrapper);
     }
@@ -135,17 +133,16 @@ public List<MapaConNombre> leerConjuntoDeArchivoConNombres(File archivo, int row
     return listaDeMapasEnvueltos;
 }
     /**
-     * PRIVATE HELPER METHOD: This is the refactored original method.
-     * Its only job is to convert a pre-read list of string arrays into one MapaParticular.
+     * metodo privado de utilidad que convierte una lista de strings en un mapa particular
      */
     public static MapaParticular parsearFilasAMapa(List<String[]> filasDelMapa, int indice) {
         int numRenglones = filasDelMapa.size();
         if (numRenglones == 0) {
-            throw new IllegalArgumentException("La lista de filas para parsear está vacía.");
+            throw new IllegalArgumentException("La lista de filas para parsear esta vacía.");
         }
         int numColumnas = filasDelMapa.get(0).length;
 
-        // --- The core parsing logic is unchanged ---
+      
         double[] ondas = new double[numRenglones];
         for (int fila = 0; fila < numRenglones; fila++) {
             ondas[fila] = Double.parseDouble(filasDelMapa.get(fila)[0].trim());

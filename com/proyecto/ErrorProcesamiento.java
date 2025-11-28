@@ -1,6 +1,9 @@
-// excepcion base
 package com.proyecto;
 
+/**
+ * Clase excepcion de procesamiento base
+ *
+ */
 public class ErrorProcesamiento extends Exception {
     public ErrorProcesamiento(String mensaje) {
         super(mensaje);

@@ -1,4 +1,7 @@
 package com.proyecto;
+/**
+ * clase de errores en proceso
+ */
 public class ErrorEnProceso extends ErrorProcesamiento {
     private int mapaIndex;
     

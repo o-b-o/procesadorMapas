@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A process that aggregates the intensities across a specified range of wavenumbers.
- * For each spectrum, it sums the intensity values within the range and outputs
- * a new spectrum where only one row contains this sum.
+ * un proceso que agrega las intensidades en un rango de numeros de onda especificados
+ * por cada espectro suma las intensidades en el rango y la regresa
+ * como un nuevo mapa donde solo hay una intensidad en cada espectro y es esta suma
  */
 public class ProcesoAgregarRangoOnda implements ProcesadorMapa {
 
@@ -30,39 +30,39 @@ public class ProcesoAgregarRangoOnda implements ProcesadorMapa {
         VecNumeroDeOnda ejeX = datosOriginales.ejeX;
         VecIntensidades[] ejeY_original = datosOriginales.ejeY;
 
-        // --- Step 1: Find all row indices that fall within our wavenumber range ---
-        List<Integer> indicesEnRango = findWavenumberIndicesInRange(ejeX);
+        // encontrar todos los indices que corresponden al rango de numeros de onda
+        List<Integer> indicesEnRango = encuentraIndicesNumeroDeOndaEnRango(ejeX);
         if (indicesEnRango.isEmpty()) {
             System.err.println("Advertencia: No se encontraron wavenumbers en el rango especificado para el mapa " + original.indice);
-            // Return a map full of zeros in this case
+            //regresar ceros si no hay
             return crearMapaVacio(original);
         }
 
-        // --- Step 2: Create the new, processed array of intensity vectors ---
+        // crear el arreglo procesado
         int numEspectros = ejeY_original.length;
         VecIntensidades[] ejeY_procesado = new VecIntensidades[numEspectros];
 
-        // --- Step 3: Loop through each spectrum (column) ---
+        //iterar por cada espectro (columna
         for (int i = 0; i < numEspectros; i++) {
             VecIntensidades espectroActual = ejeY_original[i];
             int numPuntos = espectroActual.getVecIntensidades().length;
             int sumaDeIntensidades = 0;
 
-            // For the current spectrum, sum up all the intensities at our target indices
+            // en este espectro, suma todoas las intensidades que corresponden a los indices deseados
             for (int indice : indicesEnRango) {
-                sumaDeIntensidades += espectroActual.getIntensidadAtIndex(indice);
+                sumaDeIntensidades += espectroActual.getIntensidadEnIndice(indice);
             }
 
-            // Create a new intensity array that is all zeros...
+            // crea un arreglo de intensidades vacio
             int[] nuevasIntensidades = new int[numPuntos];
-            // ... and place our calculated sum in the very first row.
-            // This is a simple trick to make our downstream `extractIntensityDataFromMap` method work without changes!
+            // y pone la suma en el primer entrada
+            // luego se extrae con extraerIntensidadDeMapa
             nuevasIntensidades[0] = sumaDeIntensidades;
 
             ejeY_procesado[i] = new VecIntensidades(nuevasIntensidades);
         }
 
-        // --- Step 4: Assemble and return the new map ---
+        // ensambla y regresa el mapa nuevo
         DatosEspectro datosProcesados = new DatosEspectro(ejeX, ejeY_procesado);
         return new MapaParticular(original.indice, datosProcesados);
     }
@@ -74,19 +74,18 @@ public class ProcesoAgregarRangoOnda implements ProcesadorMapa {
         for (MapaParticular mapaIndividual : original.arregloDeMapas) {
             mapasProcesados.add(this.procesar(mapaIndividual));
         }
-        System.out.printf("✓ Proceso completado para %d mapas.\n", mapasProcesados.size());
+        System.out.printf("Proceso completado para %d mapas.\n", mapasProcesados.size());
         return new ConjuntoDeMapas(mapasProcesados.toArray(new MapaParticular[0]));
     }
 
     /**
-     * Helper method to find all array indices corresponding to wavenumbers
-     * within the specified min/max range.
+     * metodo de utilidad para encontrar todos los indices del arreglo que corresponden a los numeros de onda en el rango especificado.
      */
-    private List<Integer> findWavenumberIndicesInRange(VecNumeroDeOnda onda) {
+    private List<Integer> encuentraIndicesNumeroDeOndaEnRango(VecNumeroDeOnda onda) { 
         List<Integer> indices = new ArrayList<>();
-        double[] wavenumbers = onda.getVecNumeroDeOnda();
-        for (int i = 0; i < wavenumbers.length; i++) {
-            if (wavenumbers[i] >= this.minOnda && wavenumbers[i] <= this.maxOnda) {
+        double[] numerosDeOnda = onda.getVecNumeroDeOnda();
+        for (int i = 0; i < numerosDeOnda.length; i++) {
+            if (numerosDeOnda[i] >= this.minOnda && numerosDeOnda[i] <= this.maxOnda) {
                 indices.add(i);
             }
         }
@@ -94,7 +93,7 @@ public class ProcesoAgregarRangoOnda implements ProcesadorMapa {
     }
     
     /**
-     * Helper to create an empty (all zero) map if no data is found in the range.
+     * utilidad para crear mapa vacio si no hay datos en el rango
      */
     private MapaParticular crearMapaVacio(MapaParticular original) {
         DatosEspectro datosOriginales = original.datos;

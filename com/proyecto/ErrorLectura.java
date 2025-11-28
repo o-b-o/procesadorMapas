@@ -1,6 +1,8 @@
 
 package com.proyecto;
-
+/**
+ * Clase de error de lectura
+ */
 public class ErrorLectura extends ErrorProcesamiento{
     private String nombreArchivo;
     

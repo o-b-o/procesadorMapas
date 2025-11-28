@@ -6,42 +6,45 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * clase encargada de loggear todo
+ */
 public class Logger {
     private static final String LOG_FILE = "analizador.log";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     /**
-     * Private constructor to prevent instantiation of this utility class.
+     * constructor privado para evitar instanciacion
      */
     private Logger() {}
 
     /**
-     * Logs a message to the console and to a persistent log file.
-     * This method is synchronized to be thread-safe.
+     * loggea un mensaje a la consola y a un archivo persistente
+     * este metodo esta sincronizado para poder usarse con hilos
      *
-     * @param level   The severity level of the message (INFO, WARN, ERROR).
-     * @param message The message to be logged.
+     * @param nivel   nivel del mensaje
+     * @param mensaje mensaje a loggear
      */
-    public static synchronized void log(LogLevel level, String message) {
-        String timestamp = dateFormat.format(new Date());
-        String threadName = Thread.currentThread().getName();
-        String logEntry = String.format("[%s] [%s] [%s]: %s", timestamp, threadName, level, message);
+    public static synchronized void log(LogLevel nivel, String mensaje) {
+        String tiempo = dateFormat.format(new Date());
+        String nombreDeHilo = Thread.currentThread().getName();
+        String entradaDeLog = String.format("[%s] [%s] [%s]: %s", tiempo, nombreDeHilo, nivel, mensaje);
 
-        // Always print to the console
-        if (level == LogLevel.ERROR) {
-            System.err.println(logEntry);
+        // siempre imprimir a consola
+        if (nivel == LogLevel.ERROR) {
+            System.err.println(entradaDeLog);
         } else {
-            System.out.println(logEntry);
+            System.out.println(entradaDeLog);
         }
 
-        // Write to the log file
+        // escribir al log
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_FILE, true))) {
-            writer.write(logEntry);
+            writer.write(entradaDeLog);
             writer.newLine();
         } catch (IOException e) {
-            // If logging fails, we're in big trouble.
-            // Print the logging failure to the console.
-            System.err.println("CRITICAL: Failed to write to log file!");
+            // si el logging falla, gran popo
+            // imprime el error de log ala consola
+            System.err.println("TERRIVLE: no se pudo escribir en el log! uwu!");
             e.printStackTrace();
         }
     }

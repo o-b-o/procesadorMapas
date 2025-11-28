@@ -1,85 +1,105 @@
-// NEW CLASS: FileMerger.java
 package com.proyecto;
 import java.io.*;
 import java.util.*;
-
+/**
+ * Clase encargada de unir archivos en un solo mega archivo.
+ * <p>
+ * 
+ * 
+ * 
+ *
+ * @author uwu
+ * @version 0.9
+ */
 public class FileMerger {
+    /**
+     * directorio de entrada
+     */
     private String inputDir;
+    /**
+     * directorio de salida
+     */
     private String outputFile;
-    
+
+    /**
+     * el constructor solo necesita un directorio de entrada y uno de salida
+     */
     public FileMerger(String inputDir, String outputFile) {
         this.inputDir = inputDir;
         this.outputFile = outputFile;
     }
-    
-    public void mergeVertically() throws IOException {
-        System.out.println("=== MERGING FILES VERTICALLY ===");
+
+    /**
+     * metodo para unir varios archivos verticalmente (apilandolos como una columna)
+     */
+    public void unirVerticalmente() throws IOException {
+        System.out.printf("uniendo archivos verticalmente\n");
         
         File dir = new File(inputDir);
-        File[] files = dir.listFiles((d, name) -> name.toLowerCase().endsWith(".csv"));
+        File[] archivos = dir.listFiles((d, name) -> name.toLowerCase().endsWith(".csv"));
         
-        if (files == null || files.length == 0) {
-            throw new IOException("No CSV files found");
+        if (archivos == null || archivos.length == 0) {
+            throw new IOException("no se encontraron CSVs");
         }
         
-        Arrays.sort(files);
-        System.out.printf("Found %d files to merge\n", files.length);
+        Arrays.sort(archivos);
+        System.out.printf("Se encontraron %d archivos para unir\n", archivos.length);
         
-        // Create header for merged file
-        Header mergedHeader = new Header();
-        mergedHeader.addMetadata("type", "merged_vertical");
-        mergedHeader.addMetadata("source_dir", inputDir);
-        mergedHeader.addMetadata("num_source_files", String.valueOf(files.length));
-        mergedHeader.addMetadata("timestamp", new Date().toString());
+        // crear header para archivo unido
+        Header headerUnido = new Header();
+        headerUnido.aniadeMetadatos("tipo", "unidos_verticalmente");
+        headerUnido.aniadeMetadatos("directorio_fuente", inputDir);
+        headerUnido.aniadeMetadatos("num_archivos_originales", String.valueOf(archivos.length));
+        headerUnido.aniadeMetadatos("hora", new Date().toString());
         
         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile), 8192 * 4);
-        writer.write(mergedHeader.toCSVHeader());
+        writer.write(headerUnido.aHeaderCSV());
         writer.newLine();
         
-        // Write source file list as comment
-        writer.write("# Source files: ");
-        for (int i = 0; i < Math.min(5, files.length); i++) {
-            writer.write(files[i].getName() + ", ");
+	// escribir al lista de archivos originales como comentario
+        writer.write("# archivos fuente: ");
+        for (int i = 0; i < Math.min(5, archivos.length); i++) {
+            writer.write(archivos[i].getName() + ", ");
         }
-        if (files.length > 5) {
-            writer.write("... (" + (files.length - 5) + " more)");
+        if (archivos.length > 5) {
+            writer.write("... (" + (archivos.length - 5) + " mas)");
         }
         writer.newLine();
         
-        int totalRows = 0;
-        for (int i = 0; i < files.length; i++) {
-            BufferedReader reader = new BufferedReader(new FileReader(files[i]));
-	        String filename = files[i].getName(); // <-- HERE is how you get the name
+        int renglonesTotales = 0;
+        for (int i = 0; i < archivos.length; i++) {
+            BufferedReader reader = new BufferedReader(new FileReader(archivos[i]));
+	        String filename = archivos[i].getName(); 
             String line;
 
 
-	        writer.write("# DATA FROM: " + filename);
+	        writer.write("# datos de: " + filename);
     writer.newLine();
-            // Skip header if present
+            // saltarse el header si hay
             line = reader.readLine();
             if (line != null && !line.startsWith("#")) {
                 writer.write(line);
                 writer.newLine();
-                totalRows++;
+                renglonesTotales++;
             }
             
-            // Copy rest of file
+            // copiar el resto del archivo
             while ((line = reader.readLine()) != null) {
-                if (!line.startsWith("#")) {  // Skip comment lines
+                if (!line.startsWith("#")) {  // saltarse lineas de commenteario
                     writer.write(line);
                     writer.newLine();
-                    totalRows++;
+                    renglonesTotales++;
                 }
             }
             reader.close();
             
-            if ((i + 1) % 100 == 0) {
-                System.out.printf("  Merged %d/%d files...\n", i + 1, files.length);
+            if ((i + 1) % 10 == 0) {
+                System.out.printf("  se han unido %d/%d archivos...\n", i + 1, archivos.length);
             }
         }
         
         writer.close();
-        System.out.printf("✓ Merged %d files → %d total rows\n", files.length, totalRows);
-        System.out.printf("  Output: %s\n", outputFile);
+        System.out.printf("Se unieron %d archivos -> %d renglones totales\n", archivos.length, renglonesTotales);
+        System.out.printf("  Resultado: %s\n", outputFile);
     }
 }
