@@ -31,7 +31,8 @@ public class FileSplitter {
 
     /**
      * metodo para separar por renglones
-     * @param 
+     * @param numeroArchivos cuantos archivos quieres de resultado
+     * @param lineasEnDatosOriginales cuantas lineas hay en un archivo original
      */
     public void separaPorRenglones(int numeroArchivos, int lineasEnDatosOriginales) throws IOException {
         System.out.printf("Dividiendo archivo en %d archivos por filas\n", numeroArchivos);

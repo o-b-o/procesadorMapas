@@ -73,7 +73,7 @@ public class DataLoader {
  * @param renglonesPorMapa renglones en un solo mapa particular
  * @param iniceInicio el indice inicial para los mapas de este archivo
  * @return una lista de MapaConNombre
- * @throws ErrorLectura si hay errores leyendo el archivo
+ * @throws IOException si hay errores leyendo el archivo
  */
 public List<MapaConNombre> leerConjuntoDeArchivoConNombres(File archivo, int renglonesPorMapa, int iniceInicio) throws IOException {
     System.out.printf("Cargando mapas y nombres desde: %s\n", archivo.getName());
