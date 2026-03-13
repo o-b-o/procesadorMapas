@@ -12,35 +12,35 @@ public class OctaveWriter {
 
     /**
      * aniade una matriz 2d a un archivo. La matriz esta construida de un arreglo 1d y dimensiones especificadas
-     * @param filepath       camino del script de matlab (e.g., "./output/results.m").
-     * @param variableName   nombre de la variable matriz en el script (e.g., "map_0001").
+     * @param caminoArchivo       camino del script de matlab (e.g., "./output/results.m").
+     * @param nombreVariable   nombre de la variable matriz en el script (e.g., "map_0001").
      * @param data           la informacion que sera convertida en la matriz de salida
-     * @param numRows        numero de renglones para matriz salida
+     * @param numRenglones        numero de renglones para matriz salida
      * @param numCols        numero de columnas para matriz salida
      * @throws IOException            si hay errores escribiendo al archivo
-     * @throws IllegalArgumentException si el tamanio de el arreglo de datos no tiene tamanio numRows*numCols
+     * @throws IllegalArgumentException si el tamanio de el arreglo de datos no tiene tamanio numRenglones*numCols
      */
-    public void escribeMatriz(String filepath, String variableName, int[] data, int numRows, int numCols) throws IOException {
+    public void escribeMatriz(String caminoArchivo, String nombreVariable, int[] data, int numRenglones, int numCols) throws IOException {
 
         // valida la entrada
 
-        if (data.length != numRows * numCols) {
+        if (data.length != numRenglones * numCols) {
             throw new IllegalArgumentException(
-                "Data size (" + data.length + ") does not match matrix dimensions (" + numRows + "x" + numCols + ")."
+                "Data size (" + data.length + ") does not match matrix dimensions (" + numRenglones + "x" + numCols + ")."
             );
         }
 
         //abre el archivo en modo append
         // el argumento true le dice a FileWriter que no sobreescriba, que aniada
-        BufferedWriter writer = new BufferedWriter(new FileWriter(filepath, true));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(caminoArchivo, true));
 
         // escribir la matriz
-        writer.write(variableName + " = [");
+        writer.write(nombreVariable + " = [");
 
         int dataIndex = 0; // un contador para el arreglo 1d
 
         // renglones
-        for (int r = 0; r < numRows; r++) {
+        for (int r = 0; r < numRenglones; r++) {
             // columnas
             for (int c = 0; c < numCols; c++) {
                 writer.write(String.valueOf(data[dataIndex++]));
@@ -51,7 +51,7 @@ public class OctaveWriter {
                 }
             }
             // aniade punto y coma entre renglones, pero no despues del ultimo
-            if (r < numRows - 1) {
+            if (r < numRenglones - 1) {
                 writer.write("; ");
             }
         }
@@ -69,12 +69,12 @@ public class OctaveWriter {
     /**
      * aniade los comandos de visualizacion finales a un archivo de octave
      */
-    public void aniadeComandosVisualizacion(String filepath, String firstMapName, double wavenumber) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(filepath, true));
+    public void aniadeComandosVisualizacion(String caminoArchivo, String nombrePrimerMapa, double numeroDeOnda) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(caminoArchivo, true));
         writer.write("# Comandos de Visualizacion\n");
         writer.write("figure;\n");
-        writer.write(String.format("imagesc(%s);\n", firstMapName));
-        writer.write(String.format("title('Intensidad en la onda ~%.2f cm^{-1}');\n", wavenumber));
+        writer.write(String.format("imagesc(%s);\n", nombrePrimerMapa));
+        writer.write(String.format("title('Intensidad en la onda ~%.2f cm^{-1}');\n", numeroDeOnda));
         writer.write("colorbar;\n");
         writer.write("axis equal tight;\n"); 
         writer.close();

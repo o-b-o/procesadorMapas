@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * representa una tarea de analisis para un archivo batch
@@ -39,7 +40,7 @@ public class AnalisisTask implements Callable<List<String>> {
  */
 @Override
 public List<String> call() throws Exception {
-    System.out.printf("Thread '%s' iniciando trabajo en: %s\n", Thread.currentThread().getName(), chunkFile.getName());
+    //System.out.printf("Thread '%s' iniciando trabajo en: %s\n", Thread.currentThread().getName(), chunkFile.getName());
 
     OctaveWriter octaveWriter = new OctaveWriter();
     List<String> variablesEscritas = new ArrayList<>();
@@ -55,13 +56,27 @@ public List<String> call() throws Exception {
             if (line.trim().startsWith("# datos de:")) {
                 // encontramos un nombre de archiov para el siguiente bloque de datos
                 nombreDeMapaActual = line.replace("# datos de:", "").trim();
+
+		analizarMetadatos(nombreDeMapaActual);
+                System.out.printf("[] Despues de analizar '%s': Q1=%d\n", 
+				  nombreDeMapaActual, Proyecto.COUNT_Q1.get());
+		System.out.printf("DEBUG: Q1, %d\n", Proyecto.COUNT_Q1.get());
+		System.out.printf("DEBUG: Q2, %d\n", Proyecto.COUNT_Q2.get());
+		System.out.printf("DEBUG: Q3, %d\n", Proyecto.COUNT_Q3.get());
+		System.out.printf("DEBUG: Q4, %d\n", Proyecto.COUNT_Q4.get());
+		System.out.printf("DEBUG: 4T1F, %d\n", Proyecto.COUNT_4T1F.get());
+		System.out.printf("DEBUG: 4T1 %d\n", Proyecto.COUNT_4T1.get());
+		System.out.printf("DEBUG: MDAF, %d\n", Proyecto.COUNT_MDAF.get());
+		System.out.printf("DEBUG: MDA, %d\n", Proyecto.COUNT_MDA.get());
+		System.out.printf("DEBUG: MCF10A, %d\n", Proyecto.COUNT_MCF10A.get());
+
             } else if (!line.startsWith("#") && !line.trim().isEmpty()) {
                 // esta es una linea de datos, aniadimos a nuestra lista temporal
                 renglonesParaUnMapa.add(line.split("\t"));
 
                 // revisa si hemos colectado suficientes renglones para un mapa completo
                 if (renglonesParaUnMapa.size() == this.config.getLongitudY()) {
-                    
+
                     // tenemos mapa completo, a procesar
                     
                     // 1. filtrar, revisamos el nombre antes de parsear datos
@@ -108,7 +123,44 @@ public List<String> call() throws Exception {
     
     return variablesEscritas;
 }
+    /**
+     * metodo de utilidad helper para contar categorias seguro para threads
+     */
+
+    private void analizarMetadatos(String nombre) {
+    System.out.printf("DEBUG: Analizando '%s'\n", nombre);
+    String n = nombre.toUpperCase();
     
+    // Calidad
+    if (n.contains("Q1")) {
+        Proyecto.COUNT_Q1.incrementAndGet();
+
+    } else if (n.contains("Q2")) {
+        Proyecto.COUNT_Q2.incrementAndGet();
+        System.out.printf("DEBUG: Incremento Q2, %d", Proyecto.COUNT_Q2.get());
+    } else if (n.contains("Q3")) {
+        Proyecto.COUNT_Q3.incrementAndGet();
+        System.out.printf("DEBUG: Incremento Q3, %d", Proyecto.COUNT_Q3.get());
+    } else if (n.contains("Q4")) {
+        Proyecto.COUNT_Q4.incrementAndGet();
+        System.out.printf("DEBUG: Incremento Q4, %d", Proyecto.COUNT_Q4.get());
+    }
+
+    // Linea celular
+    if (n.contains("4T1F")) {
+        Proyecto.COUNT_4T1F.incrementAndGet();
+    } else if (n.contains("4T1")) {
+        Proyecto.COUNT_4T1.incrementAndGet();
+    } else if (n.contains("MDAF")) {
+        Proyecto.COUNT_MDAF.incrementAndGet();
+    } else if (n.contains("MDA")) {
+        Proyecto.COUNT_MDA.incrementAndGet();
+    } else if (n.contains("MCF10A")) {
+        Proyecto.COUNT_MCF10A.incrementAndGet();
+    } else {
+        Proyecto.COUNT_DESCONOCIDO.incrementAndGet();
+    }
+}
 
     private static int[] extraerIntensidadMapa(MapaParticular mapa) {
         VecIntensidades[] espectros = mapa.datos.ejeY;

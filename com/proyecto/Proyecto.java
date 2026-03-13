@@ -2,6 +2,12 @@ package com.proyecto;
 import java.util.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
+
 /**
  * Clase principal, gestora de la entrada de informacion por parte del usuario, de llamar la rutina de lectura de datos, o de procesamiento de datos. 
  * <p>
@@ -23,6 +29,19 @@ public class Proyecto {
      * configuracion
      */ 
     private static DataGeometry geometry;
+    /**
+     * contadores global (seguros para threading por atomicInteger      )
+     */
+public static  AtomicInteger COUNT_Q1 = new AtomicInteger(0);
+public static  AtomicInteger COUNT_Q2 = new AtomicInteger(0);
+public static  AtomicInteger COUNT_Q3 = new AtomicInteger(0);
+public static  AtomicInteger COUNT_Q4 = new AtomicInteger(0);
+public static  AtomicInteger COUNT_4T1 = new AtomicInteger(0);
+public static  AtomicInteger COUNT_4T1F = new AtomicInteger(0);
+public static  AtomicInteger COUNT_MDA = new AtomicInteger(0);
+public static  AtomicInteger COUNT_MDAF = new AtomicInteger(0);
+public static  AtomicInteger COUNT_MCF10A = new AtomicInteger(0);
+public static  AtomicInteger COUNT_DESCONOCIDO = new AtomicInteger(0);
     /**
      * cuerpo principal del programa
      * intenta  correr la secuencia inicial: parsear argumentos, hacer un mapa de parametros, y correr la interfaz al usuario
@@ -82,7 +101,7 @@ public class Proyecto {
 			System.out.println("\n=== OPCIONES ===");
 			System.out.println("1. Preparar datos (merge + split)");
 			System.out.println("2. barrido de frecuencias");
-			System.out.println("3. fuck u");
+			System.out.println("3. .");
 			System.out.println("4. Separacion de datos personalizada");
 			System.out.println("5. filtrado por tipo o calidad");
 			System.out.println("6. proceso Concurrente");
@@ -97,7 +116,7 @@ public class Proyecto {
 		    int numOoo;
 		    double numOo;
 		    long startTime;
-		    long endTime; //endtimes hehehhh uh.
+		    long endTime; //
 		    /**
 		     * switch de opciones que puede escoger el usuario
 		     * @param 0 selecciona y ejecuta la rutina de particion de un mega archivo (generado por el caso 1 sin ejecutar previamente la rutina de creacion de el mega archivo
@@ -112,8 +131,8 @@ public class Proyecto {
 
 
 		    FiltroConfig conc;
-		    String cellLineFilter;
-		    String qualityFilter; 
+		    String filtroDeLineaCelular;
+		    String filtroCalidad; 
 
 		    double banda;
 
@@ -150,15 +169,15 @@ public class Proyecto {
 		    case 5: { 
 
 			 conc = configFiltros(scanner);
-			 cellLineFilter = conc.filtroLineaCelular;
-			 qualityFilter = conc.filtroCalidad;
+			 filtroDeLineaCelular = conc.filtroLineaCelular;
+			 filtroCalidad = conc.filtroCalidad;
 			 numOo = conc.numeroDeOnda;
 			 banda = conc.anchoDeBanda;
 
 
 			startTime = System.currentTimeMillis();
 			// llamar el metodo de analisis con los filtros como parametros
-			ejecutarFaseAnalisis2(geometry, numOo, banda, cellLineFilter, qualityFilter);
+			ejecutarFaseAnalisis2(geometry, numOo, banda, filtroDeLineaCelular, filtroCalidad);
 			
 			endTime = System.currentTimeMillis();
 			System.out.printf("tiempo ejecucion %d ms\n", endTime-startTime);
@@ -167,15 +186,15 @@ public class Proyecto {
 		    }
 		    case 6: {
 			 conc = configFiltros(scanner);
-			 cellLineFilter = conc.filtroLineaCelular;
-			 qualityFilter = conc.filtroCalidad;
+			 filtroDeLineaCelular = conc.filtroLineaCelular;
+			 filtroCalidad = conc.filtroCalidad;
 			 numOo = conc.numeroDeOnda;
 			 banda = conc.anchoDeBanda;
 
 
 			// llama al metodo de analisis pasando los filtros como argumentos
 			startTime = System.currentTimeMillis();
-			ejecutarAnalisisConcurrente(geometry, numOo, cellLineFilter, qualityFilter);
+			ejecutarAnalisisConcurrente(geometry, numOo, filtroDeLineaCelular, filtroCalidad);
 			endTime = System.currentTimeMillis();
 			System.out.printf("tiempo ejecucion %d ms\n", endTime-startTime);
 			break;
@@ -184,21 +203,21 @@ public class Proyecto {
 		    case 7: {
 
 						conc = configFiltros(scanner);
-			 cellLineFilter = conc.filtroLineaCelular;
-			 qualityFilter = conc.filtroCalidad;
+			 filtroDeLineaCelular = conc.filtroLineaCelular;
+			 filtroCalidad = conc.filtroCalidad;
 			 numOo = conc.numeroDeOnda;
 			 banda = conc.anchoDeBanda;
 			long concSeqDelta=0;			
 		startTime = System.currentTimeMillis();
 		
-		ejecutarFaseAnalisis2(geometry, numOo, banda, cellLineFilter, qualityFilter);
+		ejecutarFaseAnalisis2(geometry, numOo, banda, filtroDeLineaCelular, filtroCalidad);
 		
 		endTime = System.currentTimeMillis();
 		concSeqDelta=endTime-startTime;
 		System.out.printf("tiempo ejecucion %d ms\n", endTime-startTime);
 		
 		startTime = System.currentTimeMillis();
-		ejecutarAnalisisConcurrente(geometry, numOo, cellLineFilter, qualityFilter);
+		ejecutarAnalisisConcurrente(geometry, numOo, filtroDeLineaCelular, filtroCalidad);
 		endTime = System.currentTimeMillis();
 		System.out.printf("tiempo ejecucion %d ms\n", endTime-startTime);
 		System.out.printf("tiempo analisis secuencial %d ms tiempo analisis concurrente %d\n", concSeqDelta, endTime-startTime);
@@ -222,38 +241,38 @@ public class Proyecto {
     private static FiltroConfig configFiltros(Scanner scanner){
 			    			System.out.printf("Configuracion de Filtros\n");
 			System.out.printf("Filtrar por linea celular (ej: 4T1, o presione Enter para todos): \n");
-			 String cellLineFilter = Menu.getUserInput(scanner); 
+			 String filtroDeLineaCelular = Menu.getUserInput(scanner); 
 			
 			System.out.printf("Filtrar por calidad (ej: Q1, o presione Enter para todos): \n");
-			 String qualityFilter = Menu.getUserInput(scanner);
+			 String filtroCalidad = Menu.getUserInput(scanner);
 			
 			System.out.printf("Seleccione numero de onda de interes: \n");
 			double numOo = Menu.getUserDouble(scanner,1000); 
 			
 			System.out.printf("Seleccione ancho de banda\n");
 			double banda = Menu.getUserDouble(scanner,100);
-			    return new FiltroConfig(cellLineFilter, qualityFilter, numOo, banda);
+			    return new FiltroConfig(filtroDeLineaCelular, filtroCalidad, numOo, banda);
     }
     /**
      * funcion ejecutora de analisis concurrente
      * @param config es un objeto DataGeometry con la informacion necesaria para el proceso
      * @param targetWavernumber el numero de onda que busca el proceso
-     * @param cellLineFilter filtro de linea celular
-     * @param qualityFilter filtro de calidad
+     * @param filtroDeLineaCelular filtro de linea celular
+     * @param filtroCalidad filtro de calidad
      * ejecuta un proceso de seleccion de numero de onda y escribe los resultados en un archivo que peude ser leido por octave.
      */
-private static void ejecutarAnalisisConcurrente(DataGeometry config, double targetWavenumber, String cellLineFilter, String qualityFilter) {
-    System.out.println("\n=== FASE 3: ANÁLISIS DE DATOS (CONCURRENTE) ===\n");
+private static void ejecutarAnalisisConcurrente(DataGeometry config, double numeroDeOndaSeleccionado, String filtroDeLineaCelular, String filtroCalidad) {
+    System.out.printf("analisis concurrente de datos \n");
 
     // configuracion
     String chunkDir = config.outputDir + "chunks/";
     System.out.printf("chunkdir %s \n", chunkDir);
     String procdDir = config.outputDir + "/procd/";
         System.out.printf("outdir %s procddir %s \n", chunkDir, procdDir);
-    String filterTag = cellLineFilter.isEmpty() ? "todos" : cellLineFilter;
+    String filterTag = filtroDeLineaCelular.isEmpty() ? "todos" : filtroDeLineaCelular;
     filterTag += "_";
-    filterTag += qualityFilter.isEmpty() ? "todos" : qualityFilter;
-    String octaveFilename = String.format("%s/resultado_CONCURRENTE_%s_onda_%.0f.m", procdDir, filterTag, targetWavenumber);
+    filterTag += filtroCalidad.isEmpty() ? "todos" : filtroCalidad;
+    String octaveFilename = String.format("%s/resultado_CONCURRENTE_%s_onda_%.0f.m", procdDir, filterTag, numeroDeOndaSeleccionado);
     
 
     File procdDirFile = new File(procdDir);
@@ -269,12 +288,12 @@ private static void ejecutarAnalisisConcurrente(DataGeometry config, double targ
     if (chunks.length == 0) { executor.shutdown(); return; }
 
     List<java.util.concurrent.Future<List<String>>> listaDeFuturos = new ArrayList<>();
-    ProcesoAgregarRangoOnda procesoCompartido = new ProcesoAgregarRangoOnda(targetWavenumber, targetWavenumber + 10.0);
+    ProcesoAgregarRangoOnda procesoCompartido = new ProcesoAgregarRangoOnda(numeroDeOndaSeleccionado, numeroDeOndaSeleccionado + 10.0);
     int mapIndexCounter = 0;
 
     for (File chunkFile : chunks) {
         // crear instancia de tarea para este archivo  porcion especifico
-        AnalisisTask task = new AnalisisTask(chunkFile, config, cellLineFilter, qualityFilter, procesoCompartido, octaveFilename, mapIndexCounter);
+        AnalisisTask task = new AnalisisTask(chunkFile, config, filtroDeLineaCelular, filtroCalidad, procesoCompartido, octaveFilename, mapIndexCounter);
 
 	// someter la tarea, empieza a correr en un hilo en el fondo
 
@@ -300,18 +319,25 @@ private static void ejecutarAnalisisConcurrente(DataGeometry config, double targ
         }
     }
 
+
+
     // cerrar y finalizar
     executor.shutdown(); // cerrar el ejecutor (sino el programa se queda volando hangueado en el espacio)
-
-    System.out.printf("Analisis concurrente completado. Se procesaron %d mapas en total.\n", totalMapasProcesados);
-    
+    //    System.out.printf("Analisis concurrente completado. Se procesaron %d mapas en total.\n", totalMapasProcesados);    statsWriter.close();
+    //
     if (totalMapasProcesados > 0) {
         try {
             OctaveWriter octaveWriter = new OctaveWriter();
-            octaveWriter.aniadeComandosVisualizacion(octaveFilename, "map_0000", targetWavenumber);
+            octaveWriter.aniadeComandosVisualizacion(octaveFilename, "map_0000", numeroDeOndaSeleccionado);
         } catch (IOException e) {             System.err.printf("ocurrio un error al terminar de escribir el archivo de salida\n"); }
     }
+    
+    
+  
 }
+   
+
+
 
 
 /**
@@ -322,11 +348,11 @@ private static void ejecutarAnalisisConcurrente(DataGeometry config, double targ
      * @param config es un objeto DataGeometry con la informacion necesaria para el proceso
      * @param targetWavernumber el numero de onda que busca el proceso
      * @param anchoDeBanda el ancho del intervalo sobre el cual se promedian intensidades
-     * @param cellLineFilter filtro de linea celular
-     * @param qualityFilter filtro de calidad
+     * @param filtroDeLineaCelular filtro de linea celular
+     * @param filtroCalidad filtro de calidad
      * ejecuta un proceso de seleccion de numero de onda y escribe los resultados en un archivo que peude ser leido por octave.
      */
-    private static void ejecutarFaseAnalisis2(DataGeometry config, double targetWavenumber, double anchoDeBanda, String cellLineFilter, String qualityFilter) {
+    private static void ejecutarFaseAnalisis2(DataGeometry config, double numeroDeOndaSeleccionado, double anchoDeBanda, String filtroDeLineaCelular, String filtroCalidad) {
     System.out.println(" analisis con filtrado por nombre \n");
 
     // configuracion
@@ -334,22 +360,22 @@ private static void ejecutarAnalisisConcurrente(DataGeometry config, double targ
     String procdDir = outputDir + "/procd";
     System.out.printf("outdir %s procddir %s \n", chunkDir, procdDir);
     // el archivo de salida refleja los filtros usados
-    String filterTag = cellLineFilter.isEmpty() ? "todos" : cellLineFilter;
+    String filterTag = filtroDeLineaCelular.isEmpty() ? "todos" : filtroDeLineaCelular;
     filterTag += "_";
-    filterTag += qualityFilter.isEmpty() ? "todos" : qualityFilter;
-    String octaveFilename = String.format("%s/resultado_%s_onda_%.0f.m", procdDir, filterTag, targetWavenumber);
+    filterTag += filtroCalidad.isEmpty() ? "todos" : filtroCalidad;
+    String octaveFilename = String.format("%s/resultado_%s_onda_%.0f.m", procdDir, filterTag, numeroDeOndaSeleccionado);
 
     System.out.printf("Filtros activos: Linea Celular = '%s', Calidad = '%s'\n", 
-                      cellLineFilter.isEmpty() ? "N/A" : cellLineFilter, 
-                      qualityFilter.isEmpty() ? "N/A" : qualityFilter);
+                      filtroDeLineaCelular.isEmpty() ? "N/A" : filtroDeLineaCelular, 
+                      filtroCalidad.isEmpty() ? "N/A" : filtroCalidad);
     System.out.printf("Leyendo chunks desde: %s\n", chunkDir);
     System.out.printf("Escribiendo salida en: %s\n", octaveFilename);
 
 
     DataLoader dataLoader = new DataLoader();
     
-    double minOnda = targetWavenumber - (anchoDeBanda / 2.0);
-    double maxOnda = targetWavenumber + (anchoDeBanda / 2.0);
+    double minOnda = numeroDeOndaSeleccionado - (anchoDeBanda / 2.0);
+    double maxOnda = numeroDeOndaSeleccionado + (anchoDeBanda / 2.0);
     ProcesoAgregarRangoOnda miProceso = new ProcesoAgregarRangoOnda(minOnda, maxOnda);
 
         
@@ -374,12 +400,12 @@ private static void ejecutarAnalisisConcurrente(DataGeometry config, double targ
 
             // filtrar y procesar
             for (MapaConNombre mapaWrapper : mapasConNombre) {
-                String filename = mapaWrapper.originalFilename;
+                String filename = mapaWrapper.nombreOriginal;
                 MapaParticular mapaActual = mapaWrapper.mapa;
 
                 // booleano que decide si se procesa o no un mapa
-                boolean pasaFiltroLinea = cellLineFilter.isEmpty() || filename.contains(cellLineFilter);
-                boolean pasaFiltroCalidad = qualityFilter.isEmpty() || filename.contains(qualityFilter);
+                boolean pasaFiltroLinea = filtroDeLineaCelular.isEmpty() || filename.contains(filtroDeLineaCelular);
+                boolean pasaFiltroCalidad = filtroCalidad.isEmpty() || filename.contains(filtroCalidad);
 
                 if (pasaFiltroLinea && pasaFiltroCalidad) {
                     System.out.printf("El mapa de '%s' paso el filtro. Procesando...\n", filename);
@@ -418,7 +444,7 @@ private static void ejecutarAnalisisConcurrente(DataGeometry config, double targ
     // aniadir comando de visualizacion al final del archivo de resultado
     if (mapasProcesadosCount > 0) {
         try {
-            octaveWriter.aniadeComandosVisualizacion(octaveFilename, "map_0000", targetWavenumber);
+            octaveWriter.aniadeComandosVisualizacion(octaveFilename, "map_0000", numeroDeOndaSeleccionado);
         } catch (IOException e) {
             System.err.println("Error al escribir los comandos de visualizacion.");
         }

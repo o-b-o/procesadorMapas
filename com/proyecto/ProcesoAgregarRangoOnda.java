@@ -33,7 +33,7 @@ public class ProcesoAgregarRangoOnda implements ProcesadorMapa {
         // encontrar todos los indices que corresponden al rango de numeros de onda
         List<Integer> indicesEnRango = encuentraIndicesNumeroDeOndaEnRango(ejeX);
         if (indicesEnRango.isEmpty()) {
-            System.err.println("Advertencia: No se encontraron wavenumbers en el rango especificado para el mapa " + original.indice);
+
             //regresar ceros si no hay
             return crearMapaVacio(original);
         }

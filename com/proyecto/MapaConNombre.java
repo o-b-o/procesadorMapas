@@ -17,12 +17,12 @@ public class MapaConNombre {
     /**
      * Nombre del mapa (filename)
      */
-    public final String originalFilename;
+    public final String nombreOriginal;
     /**
      * el constructor requiere un mapa y un nombre
      */
-    public MapaConNombre(MapaParticular mapa, String originalFilename) {
+    public MapaConNombre(MapaParticular mapa, String nombreOriginal) {
         this.mapa = mapa;
-        this.originalFilename = originalFilename;
+        this.nombreOriginal = nombreOriginal;
     }
 }

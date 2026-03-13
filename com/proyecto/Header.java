@@ -13,27 +13,27 @@ public class Header {
     /**
      * un mapa entre una llave y un valor
      */
-    private Map<String, String> metadata;
+    private Map<String, String> metadatos;
 
     /**
      * el constructor inicializa un hashmap vacio
      */
     public Header() {
-        this.metadata = new HashMap<>();
+        this.metadatos = new HashMap<>();
     }
 
     /**
      * aniade al hashmap una entrada llave valor
      */
     public void aniadeMetadatos(String llave, String valor) {
-        metadata.put(llave, valor);
+        metadatos.put(llave, valor);
     }
 
     /**
      * adquiere el valor asociado a una llave
      */
     public String getMetadatos(String llave) {
-        return metadata.get(llave);
+        return metadatos.get(llave);
     }
     /**
      * escribe las entradas del mapa a un string y regresa el string resultante
@@ -41,7 +41,7 @@ public class Header {
     public String aHeaderCSV() {
         // Format: # key1=value1; key2=value2; key3=value3
         StringBuilder sb = new StringBuilder("# ");
-        for (Map.Entry<String, String> entrada : metadata.entrySet()) {
+        for (Map.Entry<String, String> entrada : metadatos.entrySet()) {
             sb.append(entrada.getKey()).append("=").append(entrada.getValue()).append("; ");
         }
         return sb.toString().trim();

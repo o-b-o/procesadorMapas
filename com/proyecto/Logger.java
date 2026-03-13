@@ -10,7 +10,7 @@ import java.util.Date;
  * clase encargada de loggear todo
  */
 public class Logger {
-    private static final String LOG_FILE = "analizador.log";
+    private static final String ARCHIVO_LOG = "analizador.log";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     /**
@@ -38,7 +38,7 @@ public class Logger {
         }
 
         // escribir al log
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_FILE, true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(ARCHIVO_LOG, true))) {
             writer.write(entradaDeLog);
             writer.newLine();
         } catch (IOException e) {
